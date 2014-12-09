@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="war" build-on-make="true" name="spring-data-jpa:war">
+    <output-path>$PROJECT_DIR$/target</output-path>
+    <root id="archive" name="spring-data-jpa.war">
+      <element id="artifact" artifact-name="spring-data-jpa:war exploded" />
+    </root>
+  </artifact>
+</component>

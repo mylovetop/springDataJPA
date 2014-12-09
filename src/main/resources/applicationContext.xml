@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+      http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa-1.0.xsd
+      http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd
+      http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+
+    <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath*:properties/param.properties</value>
+            </list>
+        </property>
+    </bean>
+
+
+    <!--数据库连接-->
+    <import resource="classpath:dataSource.xml"></import>
+
+
+    <!-- 实体管理器 -->
+    <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="persistenceProvider"><!-- 用于指定持久化实现厂商类 -->
+            <bean class="org.hibernate.jpa.HibernatePersistenceProvider"/>
+        </property>
+        <property name="dataSource" ref="dataSource" />			<!-- 不通过持久化单元而通过数据源来操作 -->
+        <!--
+        <property name="persistenceUnitName" value="p2pUnit"/>
+         -->
+        <property name="packagesToScan" value="com.site.model.domain" /><!--**** 扫描实体@Entity的包  ***-->
+        <property name="jpaDialect"><!-- 用于指定一些高级特性 -->
+            <bean class="org.springframework.orm.jpa.vendor.HibernateJpaDialect"/>
+        </property>
+        <property name="jpaVendorAdapter"><!-- 用于设置JPA实现厂商的特定属性 -->
+            <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+                <property name="databasePlatform" value="org.hibernate.dialect.MySQL5Dialect" />
+                <property name="database" value="MYSQL" />
+                <property name="showSql" value="false" />
+                <property name="generateDdl" value="true" />
+            </bean>
+        </property>
+        <property name="jpaProperties">
+            <props>
+                <prop key="hibernate.max_fetch_depth">3</prop>
+                <prop key="hibernate.jdbc.fetch_size">18</prop>
+                <prop key="hibernate.jdbc.batch_size">10</prop>
+                <prop key="hibernate.hbm2ddl.auto">update</prop>
+                <prop key="javax.persistence.validation.mode">none</prop>
+                <prop key="hibernate.current_session_context_class">org.springframework.orm.hibernate4.SpringSessionContext</prop>
+            </props>
+        </property>
+    </bean>
+    <!-- 事务管理器 -->
+    <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="entityManagerFactory" />
+    </bean>
+    <!--开启注解事务控制 -->
+    <tx:annotation-driven transaction-manager="transactionManager" proxy-target-class="true" />
+
+    <!--Configures Spring Data JPA and sets the base package of my DAOs.-->
+    <!--Spring 配置文件中启用扫描并自动创建代理的功能 （开启后，不需要对每个dao 添加 注解）-->
+    <jpa:repositories base-package="com.site.model.dao" entity-manager-factory-ref="entityManagerFactory" transaction-manager-ref="transactionManager"></jpa:repositories>
+
+</beans>
